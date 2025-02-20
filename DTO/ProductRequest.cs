@@ -1,4 +1,4 @@
-namespace fastdemo.DTO;
+namespace fastDemo.DTO;
 
 public class ProductRequest
 {

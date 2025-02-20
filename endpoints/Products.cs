@@ -1,5 +1,5 @@
 using FastEndpoints;
-using fastdemo.DTO;
+using fastDemo.DTO;
 
 public class ProductsDB
 {
@@ -25,7 +25,7 @@ public class GetAllProductsEndpoint : EndpointWithoutRequest<List<ProductRespons
         var products = ProductsDB._products.Select(p => new ProductResponse
         {
             Id = p.Id,
-            FullName = $"{p.Name} ({p.Category})",
+            Name = p.Name,
             InStock = p.Stock > 0
         }).ToList();
 
@@ -33,38 +33,29 @@ public class GetAllProductsEndpoint : EndpointWithoutRequest<List<ProductRespons
     }
 }
 
-
 // Create Product
 public class CreateProductEndpoint : Endpoint<ProductRequest, ProductResponse>
 {
     public override void Configure()
     {
         Post("/products");
+        AllowAnonymous();
     }
 
     public override async Task HandleAsync(ProductRequest req, CancellationToken ct)
     {
-        var newProduct = new ProductRequest
-        {
-            Id = ProductsDB._products.Any() ? ProductsDB._products.Max(p => p.Id) + 1 : 1,
-            Name = req.Name,
-            Category = req.Category,
-            Stock = req.Stock
-        };
-
-        ProductsDB._products.Add(newProduct);
+        ProductsDB._products.Add(req);
 
         var response = new ProductResponse
         {
-            Id = newProduct.Id,
-            FullName = $"{newProduct.Name} ({newProduct.Category})",
-            InStock = newProduct.Stock > 0
+            Id = req.Id,
+            Name = req.Name,
+            InStock = req.Stock > 0
         };
 
         await SendAsync(response, cancellation: ct);
     }
 }
-
 
 // Delete Product
 public class DeleteProductEndpoint : EndpointWithoutRequest
@@ -72,6 +63,7 @@ public class DeleteProductEndpoint : EndpointWithoutRequest
     public override void Configure()
     {
         Delete("/products/{id}");
+        AllowAnonymous();
     }
 
     public override async Task HandleAsync(CancellationToken ct)
